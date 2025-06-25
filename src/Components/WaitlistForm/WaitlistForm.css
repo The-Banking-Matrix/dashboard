@@ -1,0 +1,46 @@
+.thanks {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, #645b42 0%, #b29c72 25%, #d2c8a4 50%, #b29c72 75%, #645b42 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+}
+
+.error {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, #644242 0%, #b27272 25%, #d2a4a4 50%, #b27272 75%, #644242 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+}
+
+.email-form {
+    margin-top: 2rem;
+    display: flex;
+    width: 100%;
+    max-width: 400px;
+}
+
+.email-input {
+    flex: 1;
+    padding: 1rem;
+    font-size: 1rem;
+    border: 1px solid rgba(178, 156, 114, .8);
+    border-radius: .5rem 0 0 .5rem;
+    background: rgba(255, 255, 255, .1);
+    color: #fff;
+    outline: none;
+    backdrop-filter: blur(5px);
+    transition: box-shadow .3s, border-color .3s;
+}
+
+.email-input::placeholder {
+    color: #bbb2a2;
+}
+
+.email-input:focus {
+    border-color: #b29c72;
+    box-shadow: 0 0 10px rgba(178, 156, 114, .6);
+}

@@ -1,0 +1,638 @@
+/* ─────────  page & layout basics ───────── */
+html,
+body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: auto;
+}
+
+.landing-root {
+    position: relative;
+    background: #0e1216;
+    max-height: 200vh;
+}
+
+/* fixed decorative columns */
+.column {
+    position: fixed;
+    top: 0;
+    height: 101vh;
+    object-fit: contain;
+    z-index: 1;
+}
+
+.column.left {
+    left: 0;
+}
+
+.column.right {
+    right: 0;
+}
+
+/* scrollable centre strip */
+.scroll-container {
+    position: relative;
+    z-index: 2;
+    max-width: 60vw;
+    margin: 0 auto;
+    height: 100vh;
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    color: #bab2a2;
+}
+
+.scroll-container::-webkit-scrollbar {
+    display: none;
+}
+
+/* generic section rules */
+.intro,
+.how-it-works,
+.waitlist {
+    scroll-snap-stop: always;
+}
+
+.intro,
+.waitlist {
+    height: 100vh;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0 1rem;
+}
+
+.intro {
+    font-size: 1.25rem;
+    line-height: 1.6;
+    color: #ccc;
+}
+
+/* ───────── How-It-Works section ───────── */
+.how-it-works {
+    position: relative;
+    height: 100vh;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0 2rem;
+    color: #bab2a2;
+}
+
+.how-it-works .title {
+    margin-bottom: 3rem;
+}
+
+/* steps grid – always single row on desktop */
+.steps-grid {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: nowrap;
+    /* keep one row */
+    width: 100%;
+    max-width: 1000px;
+}
+
+/* card appearance – auto-sizing squares */
+.step-box {
+    flex: 1 1 calc((100% - 4rem) / 3);
+    /* exactly 3 cards + 2 gaps */
+    max-width: 340px;
+    /* safety cap */
+    aspect-ratio: 1/1;
+    /* stay square */
+    background: rgba(255, 255, 255, .08);
+    border: 1px solid rgba(178, 156, 114, .4);
+    border-radius: 1rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, .3);
+    backdrop-filter: blur(10px);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 1.5rem;
+
+    opacity: 0;
+    transition: opacity .8s ease-in-out;
+}
+
+.step-box.visible {
+    opacity: 1;
+}
+
+/* step number badge */
+.step-number {
+    width: 2.8rem;
+    height: 2.8rem;
+    margin-bottom: 1rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: #0e1216;
+    background: radial-gradient(circle at top left, #d2c8a4, #b29c72);
+}
+
+/* card text */
+.step-box h3 {
+    margin: .5rem 0;
+    color: #eee8d5;
+    font-size: 1.1rem;
+}
+
+.step-box p {
+    margin: 0;
+    color: #ccc9b7;
+    font-size: .9rem;
+    line-height: 1.5;
+}
+
+/* ───────── Waitlist fade-in ───────── */
+.waitlist {
+    opacity: 0;
+    transform: translateY(50px) scale(.95);
+    transition: opacity .8s ease-in-out, transform .8s ease-in-out;
+}
+
+.waitlist.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+/* ───────── Typography & misc ───────── */
+.title {
+    font-size: 3.35vw;
+    font-weight: 700;
+    background: linear-gradient(90deg, #645b42 0%, #b29c72 25%, #d2c8a4 50%, #b29c72 75%, #645b42 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+    margin: 0;
+}
+
+.subtext {
+    font-size: 1.35vw;
+    text-align: center;
+    margin-top: 0;
+    color: #bab2a2;
+}
+
+.cta-button {
+    padding: .75rem 2rem;
+    border-radius: .5rem;
+    border: 1px solid #b29c72;
+    background: rgba(178, 156, 114, .2);
+    color: #b29c72;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: .95rem;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    cursor: pointer;
+    transition: background .3s, color .3s, box-shadow .3s, transform .2s;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, .3);
+}
+
+.cta-button:hover {
+    background: #b29c72;
+    color: #0e1216;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, .4);
+    transform: translateY(-2px);
+}
+
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+
+@media(max-width:1024px) {
+
+    /* ─────────  page & layout basics ───────── */
+    html,
+    body {
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+        overflow-y: auto;
+        height: auto;
+    }
+
+    .landing-root {
+        position: relative;
+        background: #0e1216;
+        max-height: 200vh;
+    }
+
+    /* fixed decorative columns */
+    .column {
+        position: fixed;
+        top: 0;
+        height: 101vh;
+        object-fit: contain;
+        z-index: 0;
+    }
+
+    .column.left {
+        left: -5rem;
+    }
+
+    .column.right {
+        right: -5rem;
+    }
+
+    /* scrollable centre strip */
+    .scroll-container {
+        position: relative;
+        z-index: 2;
+        max-width: 60vw;
+        margin: 0 auto;
+        height: 100vh;
+        overflow-y: auto;
+        scroll-snap-type: y mandatory;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+        color: #bab2a2;
+    }
+
+    .scroll-container::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* generic section rules */
+    .intro,
+    .how-it-works,
+    .waitlist {
+        scroll-snap-stop: always;
+    }
+
+    .intro,
+    .waitlist {
+        height: 100vh;
+        scroll-snap-align: start;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 0 1rem;
+    }
+
+    .intro {
+        font-size: 1.25rem;
+        line-height: 1.6;
+        color: #ccc;
+    }
+
+    /* ───────── How-It-Works section ───────── */
+    .how-it-works {
+        position: relative;
+        height: 100vh;
+        scroll-snap-align: start;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 0 0rem;
+        color: #bab2a2;
+    }
+
+    .how-it-works .title {
+        margin-bottom: 3rem;
+    }
+
+    .steps-grid {
+        overflow: scroll;
+        display: flex;
+        justify-content: start;
+        gap: 2rem;
+        flex-wrap: nowrap;
+        width: 100%;
+        max-width: 1000px;
+    }
+
+    /* card appearance – auto-sizing squares */
+    .step-box {
+        flex: 1 1 calc((100% - 4rem) / 3);
+        /* exactly 3 cards + 2 gaps */
+        max-width: 340px;
+        /* safety cap */
+        aspect-ratio: 1/1;
+        /* stay square */
+        background: rgba(255, 255, 255, .08);
+        border: 1px solid rgba(178, 156, 114, .4);
+        border-radius: 1rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, .3);
+        backdrop-filter: blur(10px);
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 1.5rem;
+
+        opacity: 0;
+        transition: opacity .8s ease-in-out;
+    }
+
+    .step-box.visible {
+        opacity: 1;
+    }
+
+    /* step number badge */
+    .step-number {
+        width: 2.8rem;
+        height: 2.8rem;
+        margin-bottom: 1rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.25rem;
+        color: #0e1216;
+        background: radial-gradient(circle at top left, #d2c8a4, #b29c72);
+    }
+
+    /* card text */
+    .step-box h3 {
+        margin: .5rem 0;
+        color: #eee8d5;
+        font-size: 1.1rem;
+    }
+
+    .step-box p {
+        margin: 0;
+        color: #ccc9b7;
+        font-size: .9rem;
+        line-height: 1.5;
+    }
+
+    /* ───────── Waitlist fade-in ───────── */
+    .waitlist {
+        opacity: 0;
+        transform: translateY(50px) scale(.95);
+        transition: opacity .8s ease-in-out, transform .8s ease-in-out;
+    }
+
+    .waitlist.visible {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    /* ───────── Typography & misc ───────── */
+    .title {
+        position: relative;
+        font-size: 3.75vw;
+        font-weight: 700;
+        background: linear-gradient(90deg, #645b42 0%, #b29c72 25%, #d2c8a4 50%, #b29c72 75%, #645b42 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-align: center;
+        margin: 0;
+        text-wrap: nowrap;
+        z-index: 1000;
+    }
+
+    .subtext {
+        font-size: 2vw;
+        text-align: center;
+        margin-top: 0;
+        color: #bab2a2;
+    }
+
+}
+
+
+@media(max-width:768px) {
+
+    .column {
+        position: fixed;
+        top: 0;
+        height: 101vh;
+        object-fit: contain;
+        z-index: 1;
+    }
+
+    .column.left {
+        left: -8rem;
+    }
+
+    .column.right {
+        right: -8rem;
+    }
+
+    .scroll-container {
+        position: relative;
+        z-index: 2;
+        max-width: 60vw;
+        margin: 0 auto;
+        height: 100vh;
+        overflow-y: auto;
+        scroll-snap-type: y mandatory;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+        color: #bab2a2;
+    }
+
+    .scroll-container::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* generic section rules */
+    .intro,
+    .how-it-works,
+    .waitlist {
+        scroll-snap-stop: always;
+    }
+
+    .intro,
+    .waitlist {
+        height: 100vh;
+        scroll-snap-align: start;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 0 1rem;
+    }
+
+    .intro {
+        font-size: 1.25rem;
+        line-height: 1.6;
+        color: #ccc;
+    }
+
+    /* ───────── How-It-Works section ───────── */
+    .how-it-works {
+        position: relative;
+        height: 100vh;
+        scroll-snap-align: start;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 0 2rem;
+        color: #bab2a2;
+    }
+
+    .how-it-works .title {
+        margin-bottom: 3rem;
+    }
+
+    /* steps grid – always single row on desktop */
+    .steps-grid {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        flex-wrap: nowrap;
+        /* keep one row */
+        width: 100%;
+        max-width: 1000px;
+    }
+
+    .step-box {
+        flex: 1 1 calc((100% - 4rem) / 3);
+        max-width: 340px;
+        aspect-ratio: 1/1;
+        background: rgba(255, 255, 255, .08);
+        border: 1px solid rgba(178, 156, 114, .4);
+        border-radius: 1rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, .3);
+        backdrop-filter: blur(10px);
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 1.5rem;
+
+        opacity: 0;
+        transition: opacity .8s ease-in-out;
+    }
+
+    .step-box.visible {
+        opacity: 1;
+    }
+
+    /* step number badge */
+    .step-number {
+        width: 2.8rem;
+        height: 2.8rem;
+        margin-bottom: 1rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.25rem;
+        color: #0e1216;
+        background: radial-gradient(circle at top left, #d2c8a4, #b29c72);
+    }
+
+    /* card text */
+    .step-box h3 {
+        margin: .5rem 0;
+        color: #eee8d5;
+        font-size: 1.1rem;
+    }
+
+    .step-box p {
+        margin: 0;
+        color: #ccc9b7;
+        font-size: .9rem;
+        line-height: 1.5;
+    }
+
+    /* ───────── Waitlist fade-in ───────── */
+    .waitlist {
+        opacity: 0;
+        transform: translateY(50px) scale(.95);
+        transition: opacity .8s ease-in-out, transform .8s ease-in-out;
+    }
+
+    .waitlist.visible {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    /* ───────── Typography & misc ───────── */
+    .title {
+        font-size: 5vw;
+        font-weight: 700;
+        background: linear-gradient(90deg, #645b42 0%, #b29c72 25%, #d2c8a4 50%, #b29c72 75%, #645b42 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-align: center;
+        margin: 0;
+    }
+
+    .subtext {
+        font-size: 2vw;
+        text-align: center;
+        margin-top: 0;
+        color: #bab2a2;
+    }
+
+    .cta-button {
+        padding: 0.75rem 1rem;
+        border-radius: .5rem;
+        border: 1px solid #b29c72;
+        background: rgba(178, 156, 114, .2);
+        color: #b29c72;
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        font-size: .95rem;
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+        cursor: pointer;
+        transition: background .3s, color .3s, box-shadow .3s, transform .2s;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, .3);
+    }
+
+    .cta-button:hover {
+        background: #b29c72;
+        color: #0e1216;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, .4);
+        transform: translateY(-2px);
+    }
+
+    .button-group {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+    }
+}
+
+@media(max-width:425px) {
+    .column {
+        position: fixed;
+        top: 0;
+        height: 101vh;
+        object-fit: contain;
+        z-index: 1;
+    }
+
+    .column.left {
+        left: -10rem;
+    }
+
+    .column.right {
+        right: -10rem;
+    }
+
+}

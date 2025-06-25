@@ -1,0 +1,93 @@
+.adminpanel {
+    max‑width: 1100px;
+    margin: 0 auto;
+    padding: 2rem;
+    font‑family: system‑ui, sans‑serif;
+    color: #1a1a1a;
+}
+
+.ap‑header {
+    font‑size: 1.6rem;
+    font‑weight: 600;
+    margin‑bottom: 1.5rem;
+}
+
+.ap‑controls {
+    display: flex;
+    gap: 0.75rem;
+    margin‑bottom: 1.5rem;
+}
+
+.ap‑input {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #c5c5c5;
+    border‑radius: 4px;
+    font‑size: 1rem;
+}
+
+.ap‑button {
+    background: #0657e3;
+    color: #fff;
+    border: none;
+    padding: 0 1rem;
+    font‑size: 1rem;
+    border‑radius: 4px;
+    cursor: pointer;
+}
+
+.ap‑button:hover {
+    background: #054dc5;
+}
+
+.ap‑card {
+    background: #fafafa;
+    border: 1px solid #ececec;
+    border‑radius: 6px;
+    padding: 1rem 1.25rem;
+    margin‑bottom: 1.5rem;
+}
+
+.ap‑card h2 {
+    margin‑top: 0;
+    margin‑bottom: 0.75rem;
+    font‑size: 1.1rem;
+}
+
+.ap‑table {
+    width: 100%;
+    border‑collapse: collapse;
+    font‑size: 0.9rem;
+}
+
+.ap‑table th,
+.ap‑table td {
+    padding: 0.45rem 0.6rem;
+    border: 1px solid #e5e5e5;
+    text‑align: left;
+}
+
+.ap‑table tr:nth‑child(even) {
+    background: #f6f6f6;
+}
+
+/* basic status colors */
+.status‑finished td:last‑child {
+    color: #0b7b35;
+    font‑weight: 500;
+}
+
+.status‑failed td:last‑child {
+    color: #c22727;
+    font‑weight: 500;
+}
+
+.ap‑log {
+    background: #111;
+    color: #dcdcdc;
+    padding: 0.75rem;
+    max‑height: 220px;
+    overflow‑y: auto;
+    font‑size: 0.8rem;
+    border‑radius: 4px;
+}
