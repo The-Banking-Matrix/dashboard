@@ -1,124 +1,124 @@
 /*************************************************************************
- * ingest.js — Apify to GCS (Vertex AI prep, no Firestore)
+ * ingest.js — Apify ➜ GCS (.jsonl for Vertex-AI RAG)
  *************************************************************************/
 require('dotenv').config();
 
 const { ApifyClient } = require('apify-client');
 const { Storage } = require('@google-cloud/storage');
-const path = require('path');
-const fs = require('fs');
+const crypto = require('crypto');
 
-const apify = new ApifyClient({ token: process.env.APIFY_TOKEN });
+const {
+    APIFY_TOKEN,
+    APIFY_ACTOR_ID,
+    GOOGLE_APPLICATION_CREDENTIALS,
+    GCS_BUCKET,
+    GCS_PREFIX = 'bank-chunks',
+    OPENAI_API_KEY,
+} = process.env;
 
-// --- CONFIG ---
-const GCS_BUCKET = process.env.GCS_BUCKET || 'your-bucket-name';
-const GCS_PREFIX = process.env.GCS_PREFIX || 'vertex-ingest'; // folder in bucket
-
-// --- Auth for GCP ---
-if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-    throw new Error('GOOGLE_APPLICATION_CREDENTIALS env var must be set to the path of your service account JSON.');
+if (!APIFY_TOKEN || !APIFY_ACTOR_ID || !GCS_BUCKET || !GOOGLE_APPLICATION_CREDENTIALS) {
+    throw new Error('⛔  Set APIFY_TOKEN, APIFY_ACTOR_ID, GCS_BUCKET, GOOGLE_APPLICATION_CREDENTIALS');
 }
 
+const apify = new ApifyClient({ token: APIFY_TOKEN });
 const storage = new Storage();
 
-// --- Helpers ---
-function safeFileName(url) {
-    try {
-        const { hostname, pathname } = new URL(url);
-        const base = (hostname + pathname)
-            .replace(/[^a-z0-9]+/gi, '-')
-            .replace(/-+/g, '-')
-            .replace(/^-|-$/g, '');
-        return base.length > 200 ? base.slice(0, 200) : base;
-    } catch {
-        return 'invalid-url-' + Math.random().toString(36).slice(2, 8);
+const collapse = t => t.replace(/\s+/g, ' ').trim();
+const hash = s => crypto.createHash('md5').update(s).digest('hex');
+function split(txt, max = 1500) {
+    const out = []; let buf = '';
+    for (const ln of txt.split(/\n+/)) {
+        if ((buf + ln).length > max) { out.push(buf.trim()); buf = ''; }
+        buf += ln + ' ';
     }
-}
-
-function splitIntoChunks(text, max = 1500) {
-    const out = [];
-    let buff = '';
-    for (const line of text.split(/\n+/)) {
-        if ((buff + line).length > max) { out.push(buff.trim()); buff = ''; }
-        buff += line + ' ';
-    }
-    if (buff.trim()) out.push(buff.trim());
+    if (buf.trim()) out.push(buf.trim());
     return out;
 }
 
-// --- Main ingestion ---
-async function ingest() {
-    const maxPagesCli = parseInt(process.argv.find(a => a.startsWith('--pages='))?.split('=')[1] || '', 10);
-    const maxPages = Number.isFinite(maxPagesCli) ? maxPagesCli : 10_000;
-
-    console.log('🚀 launching actor …');
-    const run = await apify.actor(process.env.APIFY_ACTOR_ID).call({
+async function ingest(maxPages = 10000) {
+    console.log('🚀  Starting Apify actor…');
+    const run = await apify.actor(APIFY_ACTOR_ID).call({
         startUrls: [{ url: 'https://hiddenroad.com/' }],
-        maxPages: maxPages,
+        maxPages,
         saveFiles: true,
         crawlerType: 'BROWSER',
-        // openAIApiKey: process.env.OPENAI_API_KEY, // only if used in Apify actor
+        openAIApiKey: OPENAI_API_KEY,
     });
 
-    if (run.status !== 'SUCCEEDED')
+    console.log(`ℹ️  Run ID: ${run.id}`);
+    console.log(`   defaultDatasetId: ${run.defaultDatasetId}`);
+    console.log(`   status: ${run.status}`);
+    if (run.status !== 'SUCCEEDED') {
         throw new Error(`Actor ended with status ${run.status}`);
-
-    console.log('⬇️  downloading dataset (JSON)…');
-    const rows = await apify.dataset(run.defaultDatasetId).downloadItems('json');
-    console.log(`📦  dataset rows parsed: ${rows.length}`);
-
-    if (rows.length === 0) {
-        console.error('Dataset is empty!');
-        return;
     }
 
-    // Debug: print 3 sample rows and key structure
-    console.log('[DEBUG] Sample rows:');
-    for (let i = 0; i < Math.min(rows.length, 3); i++) {
-        console.log(`[${i}]:`, JSON.stringify(rows[i], null, 2));
+    console.log('⬇️  Downloading dataset as JSON…');
+    const dataset = apify.dataset(run.defaultDatasetId);
+    let rows = await dataset.downloadItems('json'); // can be array, string, or Buffer
+
+    // 🚑 Fix: decode Buffer/string if needed
+    if (Buffer.isBuffer(rows)) {
+        rows = rows.toString('utf-8');
     }
-
-    // --- Save to GCS
-    let stored = 0, skipNoURL = 0, skipNoText = 0;
-    for (const [i, rec] of rows.entries()) {
-        const url = rec.url || rec.loadedUrl || (rec.request && rec.request.url);
-        if (!url) {
-            console.warn(`[DEBUG] ⚠️  skipped row ${i} (no url):`, Object.keys(rec));
-            skipNoURL++;
-            continue;
-        }
-        const text = rec.content;
-        if (!text) {
-            console.warn(`[DEBUG] ⚠️  skipped row ${i} (no content): ${url}`);
-            skipNoText++;
-            continue;
-        }
-
-        const fileType = rec.fileType || 'html';
-        const chunks = splitIntoChunks(text);
-        for (let j = 0; j < chunks.length; j++) {
-            // Save each chunk as a .txt file (or as JSONL if needed)
-            const fname = `${GCS_PREFIX}/${safeFileName(url)}-${j + 1}.${fileType}.txt`;
-            try {
-                const file = storage.bucket(GCS_BUCKET).file(fname);
-                await file.save(chunks[j], { contentType: 'text/plain' });
-                stored++;
-                if (stored % 10 === 0) console.log(`[DEBUG] Uploaded ${stored} chunks...`);
-            } catch (e) {
-                console.error(`[ERROR] Failed upload for ${fname}:`, e.message);
-            }
+    if (typeof rows === 'string') {
+        try {
+            rows = JSON.parse(rows);
+        } catch (e) {
+            console.error('Could not parse string rows:', rows.slice(0, 500));
+            throw e;
         }
     }
-    console.log(`✅ summary — stored:${stored}  |  skipURL:${skipNoURL} |  skipText:${skipNoText}`);
-    console.log('🎉 FINISHED');
+    if (!Array.isArray(rows) || rows.length === 0) {
+        console.error('🚨 final rows:', typeof rows, rows && rows.length);
+        throw new Error('Dataset empty or unparsable.');
+    }
+
+    console.log(`📦  Retrieved ${rows.length} rows`);
+    console.log('[DEBUG] Sample row #0 keys:', Object.keys(rows[0]));
+    console.log('[DEBUG] Sample row #0:', JSON.stringify(rows[0], null, 2));
+
+    let jsonl = '';
+    let stored = 0, skipURL = 0, skipTXT = 0;
+
+    for (const r of rows) {
+        if (typeof r !== 'object' || r === null) {
+            skipTXT++; continue;
+        }
+        const url = r.url || r.pageUrl || r.loadedUrl || r.request?.url || '';
+        const text = collapse(r.content || r.text || '');
+
+        if (!url) { skipURL++; continue; }
+        if (!text) { skipTXT++; continue; }
+
+        for (const [i, chunk] of split(text).entries()) {
+            jsonl += JSON.stringify({ id: hash(url + '|' + i), uri: url, text: chunk }) + '\n';
+            stored++;
+        }
+    }
+
+    console.log(`✂️  Chunks: ${stored} | skipURL: ${skipURL} | skipTXT: ${skipTXT}`);
+    if (stored === 0) {
+        throw new Error('No chunks extracted – aborting.');
+    }
+
+    const date = new Date().toISOString().slice(0, 10);
+    const name = `${GCS_PREFIX}/${date}-${hash(String(Date.now())).slice(0, 8)}.jsonl`;
+    console.log(`☁️  Uploading → gs://${GCS_BUCKET}/${name}`);
+    await storage.bucket(GCS_BUCKET)
+        .file(name)
+        .save(jsonl, { contentType: 'application/json' });
+
+    console.log('🎉  DONE – JSONL ready for Vertex-AI RAG Engine');
 }
 
-// --- Run if direct ---
 if (require.main === module) {
-    ingest().catch(err => {
-        console.error(err);
-        process.exit(1);
-    });
+    const arg = process.argv.find(a => a.startsWith('--pages='));
+    const pages = arg ? parseInt(arg.split('=')[1], 10) : 10000;
+    ingest(Number.isFinite(pages) ? pages : 10000)
+        .catch(err => {
+            console.error(err);
+            process.exit(1);
+        });
 }
 
 module.exports = { ingest };
